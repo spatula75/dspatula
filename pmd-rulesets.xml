@@ -1,0 +1,15 @@
+<ruleset name="DSPatula Ruleset" xmlns="http://pmd.sourceforge.net/ruleset/2.0.0"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://pmd.sourceforge.net/ruleset/2.0.0 http://pmd.sourceforge.net/ruleset_2_0_0.xsd">
+
+	<description>
+  PMD rules to keep us honest.
+  </description>
+
+	<rule ref="rulesets/java/basic.xml" />
+	<rule ref="rulesets/imports.xml" />
+	<rule ref="rulesets/unusedcode.xml" />
+	<rule ref="rulesets/naming.xml" />
+	<rule ref="rulesets/unnecessary.xml" />
+	
+</ruleset>

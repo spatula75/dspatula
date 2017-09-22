@@ -1,0 +1,125 @@
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+	<modelVersion>4.0.0</modelVersion>
+
+	<groupId>net.spatula</groupId>
+	<artifactId>dspatula</artifactId>
+	<version>0.0.1-SNAPSHOT</version>
+	<packaging>jar</packaging>
+
+	<name>dspatula</name>
+	<url>https://github.com/spatula75/dspatula</url>
+
+	<properties>
+		<maven.compiler.target>1.8</maven.compiler.target>
+		<maven.compiler.source>1.8</maven.compiler.source>
+		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+	</properties>
+
+	<dependencyManagement>
+		<dependencies>
+			<dependency>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-pmd-plugin</artifactId>
+				<version>3.8</version>
+				<scope>test</scope>
+			</dependency>
+			<dependency>
+				<groupId>com.github.hazendaz.spotbugs</groupId>
+				<artifactId>spotbugs-maven-plugin</artifactId>
+				<version>3.0.6</version>
+				<scope>test</scope>
+			</dependency>
+			<dependency>
+				<groupId>org.jacoco</groupId>
+				<artifactId>jacoco-maven-plugin</artifactId>
+				<version>0.7.10-SNAPSHOT</version>
+				<scope>test</scope>
+			</dependency>
+			<dependency>
+				<groupId>org.testng</groupId>
+				<artifactId>testng</artifactId>
+				<version>6.8</version>
+				<scope>test</scope>
+			</dependency>
+		</dependencies>
+	</dependencyManagement>
+
+	<dependencies>
+		<dependency>
+			<groupId>org.testng</groupId>
+			<artifactId>testng</artifactId>
+		</dependency>
+	</dependencies>
+
+	<reporting>
+		<plugins>
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-pmd-plugin</artifactId>
+				<configuration>
+					<linkXref>true</linkXref>
+					<sourceEncoding>utf-8</sourceEncoding>
+					<minimumTokens>100</minimumTokens>
+					<targetJdk>1.8</targetJdk>
+					<excludes>
+						<exclude>**/*Bean.java</exclude>
+						<exclude>**/generated/*.java</exclude>
+					</excludes>
+					<excludeRoots>
+						<excludeRoot>target/generated-sources/stubs</excludeRoot>
+					</excludeRoots>
+					<failOnViolation>true</failOnViolation>
+					<failurePriority>1</failurePriority>
+					<rulesets>
+						<ruleset>${pom.basedir}/pmd-rulesets.xml</ruleset>
+					</rulesets>
+				</configuration>
+			</plugin>
+			<plugin>
+				<groupId>com.github.hazendaz.spotbugs</groupId>
+				<artifactId>spotbugs-maven-plugin</artifactId>
+				<configuration>
+					<xmlOutput>true</xmlOutput>
+					<xmlOutputDirectory>target/site</xmlOutputDirectory>
+				</configuration>
+			</plugin>
+			<plugin>
+				<groupId>org.jacoco</groupId>
+				<artifactId>jacoco-maven-plugin</artifactId>
+			</plugin>
+		</plugins>
+	</reporting>
+
+	<build>
+		<plugins>
+			<plugin>
+				<groupId>org.jacoco</groupId>
+				<artifactId>jacoco-maven-plugin</artifactId>
+				<executions>
+					<execution>
+						<id>default-check</id>
+						<goals>
+							<goal>check</goal>
+						</goals>
+						<configuration>
+							<rules>
+								<rule implementation="org.jacoco.maven.RuleConfiguration">
+									<element>BUNDLE</element>
+									<limits>
+										<limit implementation="org.jacoco.report.check.Limit">
+											<counter>COMPLEXITY</counter>
+											<value>COVEREDRATIO</value>
+											<minimum>0.80</minimum>
+										</limit>
+									</limits>
+								</rule>
+							</rules>
+						</configuration>
+					</execution>
+				</executions>
+			</plugin>
+		</plugins>
+	</build>
+
+</project>

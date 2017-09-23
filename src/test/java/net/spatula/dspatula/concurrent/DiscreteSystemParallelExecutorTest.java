@@ -18,20 +18,20 @@ public class DiscreteSystemParallelExecutorTest {
 
     @Test
     public void testConstruct() {
-        DiscreteSystemParallelExecutor instance = DiscreteSystemParallelExecutor.getDefaultInstance();
-        DiscreteSystemParallelExecutor instance2 = DiscreteSystemParallelExecutor.getDefaultInstance();
+        final DiscreteSystemParallelExecutor instance = DiscreteSystemParallelExecutor.getDefaultInstance();
+        final DiscreteSystemParallelExecutor instance2 = DiscreteSystemParallelExecutor.getDefaultInstance();
         assertSame(instance2, instance);
     }
 
     @Test
     public void testCoreCount() {
-        DiscreteSystemParallelExecutor executor = new DiscreteSystemParallelExecutor(2, 100);
+        final DiscreteSystemParallelExecutor executor = new DiscreteSystemParallelExecutor(2, 100);
         assertEquals(2, executor.cores);
     }
 
     @Test
     public void testPoolSize() {
-        DiscreteSystemParallelExecutor executor = new DiscreteSystemParallelExecutor(2, 100);
+        final DiscreteSystemParallelExecutor executor = new DiscreteSystemParallelExecutor(2, 100);
         assertEquals(ThreadPoolExecutor.class.cast(executor.threadPool).getCorePoolSize(), 2);
     }
 
@@ -47,15 +47,15 @@ public class DiscreteSystemParallelExecutorTest {
 
     @Test
     public void testOneWorkerThreadDoesItAll() throws ProcessingException {
-        DiscreteSystemParallelExecutor executor = new DiscreteSystemParallelExecutor(1, 100);
+        final DiscreteSystemParallelExecutor executor = new DiscreteSystemParallelExecutor(1, 100);
 
-        Sequence sequence = new Sequence(8192);
+        final Sequence sequence = new Sequence(8192);
         executor.execute(new DiscreteSystemWorker() {
 
             @Override
             public void operate(Sequence... sequences) {
-                Sequence sequence = sequences[0];
-                int[] sequenceValues = sequence.getSequenceValues();
+                final Sequence sequence = sequences[0];
+                final int[] sequenceValues = sequence.getSequenceValues();
 
                 for (int index = sequence.getStart(); index <= sequence.getEnd(); index++) {
                     sequenceValues[index] = index;
@@ -64,7 +64,7 @@ public class DiscreteSystemParallelExecutorTest {
         }, sequence);
 
         // Make sure we did all our work correctly first.
-        int[] sequenceValues = sequence.getSequenceValues();
+        final int[] sequenceValues = sequence.getSequenceValues();
         for (int index = 0; index < 8192; index++) {
             assertEquals(sequenceValues[index], index);
         }
@@ -73,18 +73,18 @@ public class DiscreteSystemParallelExecutorTest {
 
     @Test
     public void testSubmitAndDivideWork() throws ProcessingException {
-        DiscreteSystemParallelExecutor executor = new DiscreteSystemParallelExecutor(5, 100);
-        Sequence sequence = new Sequence(8192);
+        final DiscreteSystemParallelExecutor executor = new DiscreteSystemParallelExecutor(5, 100);
+        final Sequence sequence = new Sequence(8192);
 
-        Set<Integer> sequenceStarts = new HashSet<>();
-        Set<Integer> sequenceEnds = new HashSet<>();
+        final Set<Integer> sequenceStarts = new HashSet<>();
+        final Set<Integer> sequenceEnds = new HashSet<>();
 
         executor.execute(new DiscreteSystemWorker() {
 
             @Override
             public void operate(Sequence... sequences) {
-                Sequence sequence = sequences[0];
-                int[] sequenceValues = sequence.getSequenceValues();
+                final Sequence sequence = sequences[0];
+                final int[] sequenceValues = sequence.getSequenceValues();
 
                 sequenceStarts.add(sequence.getStart());
                 sequenceEnds.add(sequence.getEnd());
@@ -96,7 +96,7 @@ public class DiscreteSystemParallelExecutorTest {
         }, sequence);
 
         // Make sure we did all our work correctly first.
-        int[] sequenceValues = sequence.getSequenceValues();
+        final int[] sequenceValues = sequence.getSequenceValues();
         for (int index = 0; index < 8192; index++) {
             assertEquals(sequenceValues[index], index);
         }
@@ -117,15 +117,15 @@ public class DiscreteSystemParallelExecutorTest {
     // Goofy thing for helping to characterize performance.
     @Test(enabled = false)
     public void testFindSweetSpot() throws ProcessingException {
-        DiscreteSystemParallelExecutor executor = DiscreteSystemParallelExecutor.getInstance(1);
-        SineWaveSignalGenerator generator = new SineWaveSignalGenerator(44100);
+        final DiscreteSystemParallelExecutor executor = DiscreteSystemParallelExecutor.getInstance(1);
+        final SineWaveSignalGenerator generator = new SineWaveSignalGenerator(44100);
         // warm things up first
         System.out.println("Warming up HotSpot");
         for (int j = 0; j < 1000; j++) {
             long start = 0, stop = 0;
             for (int i = 1; i < 60; i++) {
                 start = System.nanoTime();
-                Sequence sequence = generator.generate(25, i, 32767, 0);
+                final Sequence sequence = generator.generate(25, i, 32767, 0);
                 stop = System.nanoTime();
             }
             if (j % 50 == 0) {
@@ -139,9 +139,9 @@ public class DiscreteSystemParallelExecutorTest {
                 long length = 0;
                 for (int k = 1; k < 100; k++) {
                     start = System.nanoTime();
-                    Sequence sequence = generator.generate(25, i / 120F, 32767, 0);
+                    final Sequence sequence = generator.generate(25, i / 120F, 32767, 0);
                     stop = System.nanoTime();
-                    long dur = stop - start;
+                    final long dur = stop - start;
                     sum += dur;
                     length = sequence.getLength();
                 }

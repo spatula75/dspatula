@@ -3,8 +3,9 @@ package net.spatula.dspatula.time.sequence;
 import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 
 /**
- * Represents a Discrete-Time Signal Sequence. This is mostly just a convenient wrapper around
- * an integer buffer that contains the actual signal sequence values, with some helpful bookkeeping.
+ * Represents a Discrete-Time Signal Sequence. This is mostly just a convenient wrapper around an integer buffer that contains the
+ * actual signal sequence values, with some helpful bookkeeping.
+ *
  * @author spatula
  *
  */
@@ -14,10 +15,12 @@ public class Sequence {
     private final int start;
     private final int end;
     private final int length;
-    
+
     /**
      * Create a new Sequence with an empty buffer of length samples, initialized all to 0's.
-     * @param samples The length of the sequence in number of integer samples.
+     *
+     * @param samples
+     *            The length of the sequence in number of integer samples.
      */
     public Sequence(int samples) {
         sequenceValues = new int[samples];

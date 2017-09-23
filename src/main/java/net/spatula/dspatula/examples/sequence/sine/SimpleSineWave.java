@@ -15,10 +15,10 @@ public class SimpleSineWave extends AbstractSequenceChart {
 
     @Override
     protected Sequence getSequence() throws ProcessingException {
-        SineWaveSignalGenerator generator = new SineWaveSignalGenerator(8000);
+        final SineWaveSignalGenerator generator = new SineWaveSignalGenerator(8000);
         return generator.generate(60, 0.075, 32767, 0);
     }
-    
+
     public static void main(String[] args) throws ProcessingException {
         new SimpleSineWave().render();
     }

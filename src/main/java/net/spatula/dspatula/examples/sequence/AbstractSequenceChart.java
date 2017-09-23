@@ -45,10 +45,10 @@ public abstract class AbstractSequenceChart extends ApplicationFrame {
     private void initChart() throws ProcessingException {
         final XYSeries series = new XYSeries("Sequence");
 
-        Sequence sequence = getSequence();
+        final Sequence sequence = getSequence();
 
         for (int i = 0; i < sequence.getSequenceValues().length; i++) {
-            int value = sequence.getSequenceValues()[i];
+            final int value = sequence.getSequenceValues()[i];
             series.add(i, value);
         }
 
@@ -60,9 +60,9 @@ public abstract class AbstractSequenceChart extends ApplicationFrame {
         chart.setTextAntiAlias(true);
 
         // Make the scatter plot use small points instead of polygons.
-        Shape shape = new Ellipse2D.Double(0, 0, 2, 2);
-        XYPlot xyPlot = (XYPlot) chart.getPlot();
-        XYItemRenderer renderer = xyPlot.getRenderer();
+        final Shape shape = new Ellipse2D.Double(0, 0, 2, 2);
+        final XYPlot xyPlot = (XYPlot) chart.getPlot();
+        final XYItemRenderer renderer = xyPlot.getRenderer();
         renderer.setBaseShape(shape);
         renderer.setBasePaint(Color.red);
         renderer.setSeriesShape(0, shape);

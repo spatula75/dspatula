@@ -11,7 +11,7 @@ public final class SineWaveWorker implements DiscreteSystemWorker {
     private final int sampleRate;
     private final double phaseOffset;
     private final double frequency;
-    private int amplitude;
+    private final int amplitude;
 
     private static final Logger LOG = LoggerFactory.getLogger(SineWaveWorker.class);
 
@@ -24,8 +24,8 @@ public final class SineWaveWorker implements DiscreteSystemWorker {
 
     @Override
     public void operate(Sequence... sequences) {
-        Sequence sequence = sequences[0];
-        int[] sequenceValues = sequence.getSequenceValues();
+        final Sequence sequence = sequences[0];
+        final int[] sequenceValues = sequence.getSequenceValues();
 
         LOG.trace("Building sine wave from sample {} to {}", sequence.getStart(), sequence.getEnd());
 

@@ -40,3 +40,22 @@ and time-consuming to copy arrays all over the place.)
 *SineWaveSignalGenerator* (and its counterpart *SineWaveWorker*) implement the formula for generating a sine wave of a given 
 frequency and sample rate.  I added the bit about the phase offset, because I'm going to need that later myself.  For Chapter 1, 
 just specify an offset of 0 and the formula is equivalent.
+
+*Filler*, *Adder*, *Subtracter*, and *Multiplier* are some basic Discrete Systems. Strictly speaking, *Filler* is not mentioned
+in the text, but I found it helpful when writing unit tests to have a System which did nothing but fill an entire Sequence with
+one particular value.  Note that I completely made up the term "Congruent" (or at least I think I did) when naming
+*AbstractCongruentSystem* with the intention of describing two things which have the same length (like congruent line segments).
+Note that it was tempting to only refactor out the interior of the repeated `for` loop as the abstract method here, but the
+performance of that has the potential to suck due to (probably) making a method call for every iteration.
+
+From section 1.8 of Understanding DSP I noticed a Multiplier that takes a single value, so I also created *ConstantMultiplier*
+for multiplying all values of a Sequence by the same value.  It works a lot like *Filler* except that it's multiplying instead
+of simply filling.
+
+*SimpleSineWave*, *OffsetSineWave*, *SumSineWaves*, *DifferenceSineWaves*, and *MultiplySineWaves* are example Java applications
+demonstrating the discrete sequences for a sine wave, a sine wave offset by 180 degrees (pi radians), and various Discrete Systems
+applied to pairs of sine waves.  These use the excellent and highly versatile JFreeChart package.  Note that the text
+recommends against giving in to the temptation to connect the points with line segments, because nothing is actually known about
+the values between points.  To that end, we configure JFreeChart to render a scatter plot using small circles.
+
+I've opted to leave the implementation of Summation and Unit Delay until the chapter on filters when they're needed.

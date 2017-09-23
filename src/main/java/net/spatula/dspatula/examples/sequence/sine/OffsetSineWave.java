@@ -15,10 +15,10 @@ public class OffsetSineWave extends AbstractSequenceChart {
 
     @Override
     protected Sequence getSequence() throws ProcessingException {
-        SineWaveSignalGenerator generator = new SineWaveSignalGenerator(8000);
+        final SineWaveSignalGenerator generator = new SineWaveSignalGenerator(8000);
         return generator.generate(60, 0.075, 32767, Math.PI);
     }
-    
+
     public static void main(String[] args) throws ProcessingException {
         new OffsetSineWave().render();
     }

@@ -125,7 +125,7 @@ public class DiscreteSystemParallelExecutorTest {
             long start = 0, stop = 0;
             for (int i = 1; i < 60; i++) {
                 start = System.nanoTime();
-                Sequence sequence = generator.generate(25, i, 0);
+                Sequence sequence = generator.generate(25, i, 32767, 0);
                 stop = System.nanoTime();
             }
             if (j % 50 == 0) {
@@ -139,7 +139,7 @@ public class DiscreteSystemParallelExecutorTest {
                 long length = 0;
                 for (int k = 1; k < 100; k++) {
                     start = System.nanoTime();
-                    Sequence sequence = generator.generate(25, i / 120F, 0);
+                    Sequence sequence = generator.generate(25, i / 120F, 32767, 0);
                     stop = System.nanoTime();
                     long dur = stop - start;
                     sum += dur;

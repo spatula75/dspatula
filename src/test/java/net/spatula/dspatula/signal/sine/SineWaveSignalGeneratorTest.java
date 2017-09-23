@@ -15,9 +15,9 @@ public class SineWaveSignalGeneratorTest {
         assertEquals(generator.getSampleRate(), 44100);
     }
     
-    private void sineWave(int sampleRate, double frequency, double phaseOffset, int[] buffer) {
+    private void sineWave(int sampleRate, double frequency, int amplitude, double phaseOffset, int[] buffer) {
         for (int i = 0; i < buffer.length; i++) {
-            double value = Math.sin(2 * Math.PI * frequency / (double)sampleRate + phaseOffset);
+            double value = amplitude * Math.sin(2 * Math.PI * frequency / (double)sampleRate + phaseOffset);
             buffer[i] = (int)value;
         }
     }
@@ -26,9 +26,9 @@ public class SineWaveSignalGeneratorTest {
     public void testCreateSimpleSineWave() throws ProcessingException {
         SineWaveSignalGenerator generator = new SineWaveSignalGenerator(44100);
         
-        Sequence generated = generator.generate(1000D, 1D, 0D);
+        Sequence generated = generator.generate(1000D, 1D, 32767, 0D);
         int[] buffer = new int[44100];
-        sineWave(44100, 1000D, 0D, buffer);
+        sineWave(44100, 1000D, 32767, 0D, buffer);
         
         int[] generatedValues = generated.getSequenceValues();
         

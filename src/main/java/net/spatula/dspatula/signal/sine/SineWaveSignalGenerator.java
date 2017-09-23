@@ -35,13 +35,13 @@ public class SineWaveSignalGenerator {
      * @throws ProcessingException
      *             If errors are encountered during execution
      */
-    public Sequence generate(double frequency, double duration, double phaseOffset) throws ProcessingException {
+    public Sequence generate(double frequency, double duration, int amplitude,  double phaseOffset) throws ProcessingException {
         // Do this calculation with BigDecimal, to avoid float error values like 44100.0000000001 getting rounded up to 44101.
         int sequenceLength = BigDecimal.valueOf(duration).multiply(BigDecimal.valueOf(sampleRate)).setScale(0, RoundingMode.CEILING)
                 .intValue();
         Sequence sequence = new Sequence(sequenceLength);
 
-        SineWaveWorker discreteSystemWorker = new SineWaveWorker(sampleRate, frequency, phaseOffset);
+        SineWaveWorker discreteSystemWorker = new SineWaveWorker(sampleRate, frequency, amplitude, phaseOffset);
         DiscreteSystemParallelExecutor.getDefaultInstance().execute(discreteSystemWorker, sequence);
         
         return sequence;

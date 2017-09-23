@@ -11,6 +11,7 @@ import java.util.concurrent.ThreadFactory;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import net.spatula.dspatula.exception.ProcessingException;
 import net.spatula.dspatula.time.sequence.Sequence;
 
 /**
@@ -31,7 +32,7 @@ public class DiscreteSystemParallelExecutor {
     protected static DiscreteSystemParallelExecutor instance;
 
     private static final Logger LOG = LoggerFactory.getLogger(DiscreteSystemParallelExecutor.class);
-    private static final int DEFAULT_MIN_DIVISION_SIZE = 100;
+    private static final int DEFAULT_MIN_DIVISION_SIZE = 8820;  // Magic number found empirically to be ~8500
 
     protected DiscreteSystemParallelExecutor(int cores, int minimumDivisionSize) {
         this.cores = cores;
@@ -50,9 +51,11 @@ public class DiscreteSystemParallelExecutor {
                         LOG.error("Uncaught exception in thread {}", thread.getName(), throwable);
                     }
                 });
+                LOG.debug("Created thread {}", thread.getName());
                 return thread;
             }
         });
+        LOG.info("Created a parallel execution environment using {} threads", cores);
     }
 
     /**
@@ -69,9 +72,19 @@ public class DiscreteSystemParallelExecutor {
 
         return instance;
     }
+    
+    protected synchronized static DiscreteSystemParallelExecutor getInstance(int cores) {
+        if (instance != null) {
+            return instance;
+        }
+
+        instance = new DiscreteSystemParallelExecutor(cores, DEFAULT_MIN_DIVISION_SIZE);
+        
+        return instance;
+    }
 
     protected static int calculateNumberOfCores(int availableProcessors) {
-        return Math.max(availableProcessors - 1, 1);
+        return Math.max(availableProcessors - 2, 1);
     }
 
     private static class WorkerSequenceCallable implements Callable<Void> {
@@ -111,9 +124,9 @@ public class DiscreteSystemParallelExecutor {
      * 
      * @param discreteSystemWorker
      * @param sequences
-     * @throws InterruptedException
+     * @throws ProcessingException If errors occur while running the job
      */
-    public void execute(final DiscreteSystemWorker discreteSystemWorker, Sequence... sequences) throws InterruptedException {
+    public void execute(final DiscreteSystemWorker discreteSystemWorker, Sequence... sequences) throws ProcessingException  {
         int firstSequenceLength = sequences[0].getLength();
         int firstSequenceEnd = sequences[0].getEnd();
         int chunkSize = (int)Math.ceil((double)sequences[0].getLength() / (double)cores);
@@ -134,7 +147,11 @@ public class DiscreteSystemParallelExecutor {
             callables.add(new WorkerSequenceCallable(discreteSystemWorker, subsequences));
         }
         
-        threadPool.invokeAll(callables);
+        try {
+            threadPool.invokeAll(callables);
+        } catch (InterruptedException e) {
+            throw new ProcessingException("Interrupted", e);
+        }
     }
 
 }

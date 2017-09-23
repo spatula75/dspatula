@@ -6,6 +6,7 @@ import org.testng.annotations.Test;
 
 import net.spatula.dspatula.exception.ProcessingException;
 import net.spatula.dspatula.time.sequence.Sequence;
+import net.spatula.dspatula.util.FastMath;
 
 public class SineWaveSignalGeneratorTest {
 
@@ -17,7 +18,7 @@ public class SineWaveSignalGeneratorTest {
 
     private void sineWave(int sampleRate, double frequency, int amplitude, double phaseOffset, int[] buffer) {
         for (int i = 0; i < buffer.length; i++) {
-            final double value = amplitude * Math.sin(2 * Math.PI * frequency * i / sampleRate + phaseOffset);
+            final double value = amplitude * FastMath.sin(2 * Math.PI * frequency * i / sampleRate + phaseOffset);
             buffer[i] = (int) value;
         }
     }

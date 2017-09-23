@@ -5,6 +5,7 @@ import org.slf4j.LoggerFactory;
 
 import net.spatula.dspatula.concurrent.DiscreteSystemWorker;
 import net.spatula.dspatula.time.sequence.Sequence;
+import net.spatula.dspatula.util.FastMath;
 
 public final class SineWaveWorker implements DiscreteSystemWorker {
 
@@ -31,7 +32,7 @@ public final class SineWaveWorker implements DiscreteSystemWorker {
 
         for (int sampleNumber = sequence.getStart(); sampleNumber <= sequence.getEnd(); sampleNumber++) {
             sequenceValues[sampleNumber] = (int) (amplitude
-                    * Math.sin(2 * Math.PI * frequency * sampleNumber / sampleRate + phaseOffset));
+                    * FastMath.sin(2 * Math.PI * frequency * sampleNumber / sampleRate + phaseOffset));
         }
     }
 

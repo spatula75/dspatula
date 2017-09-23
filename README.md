@@ -27,6 +27,8 @@ system and for Java internals like Hotspot compilers and Garbage Collection).
 
 When looking for the formulas that are doing the bulk of the work, look at the classes which implement *DiscreteSystemWorker*.
 
+Sine and Cosine values are approximated using *FastMath*, which implements a lookup table with linear interpolation.
+
 ## Chapter Content
 
 ### Chapter One (Discrete Sequences and Their Notation)

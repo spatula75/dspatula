@@ -130,6 +130,12 @@ public class DiscreteSystemParallelExecutor {
     public void execute(final DiscreteSystemWorker discreteSystemWorker, Sequence... sequences) throws ProcessingException {
         final int firstSequenceLength = sequences[0].getLength();
         final int firstSequenceEnd = sequences[0].getEnd();
+
+        if (firstSequenceLength < minimumDivisionSize) {
+            discreteSystemWorker.operate(sequences);
+            return;
+        }
+
         final int chunkSize = (int) Math.ceil((double) sequences[0].getLength() / (double) cores);
 
         final List<Callable<Void>> callables = new ArrayList<>(cores);

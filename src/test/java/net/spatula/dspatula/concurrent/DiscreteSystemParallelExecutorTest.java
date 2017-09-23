@@ -4,9 +4,11 @@ import static org.testng.Assert.assertEquals;
 import static org.testng.Assert.assertSame;
 import static org.testng.Assert.assertTrue;
 
-import java.util.HashSet;
+import java.util.Collections;
 import java.util.Set;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ThreadPoolExecutor;
+import java.util.concurrent.atomic.AtomicInteger;
 
 import org.testng.annotations.Test;
 
@@ -49,7 +51,8 @@ public class DiscreteSystemParallelExecutorTest {
     public void testOneWorkerThreadDoesItAll() throws ProcessingException {
         final DiscreteSystemParallelExecutor executor = new DiscreteSystemParallelExecutor(1, 100);
 
-        final Sequence sequence = new Sequence(8192);
+        final int samples = 16384;
+        final Sequence sequence = new Sequence(samples);
         executor.execute(new DiscreteSystemWorker() {
 
             @Override
@@ -65,7 +68,7 @@ public class DiscreteSystemParallelExecutorTest {
 
         // Make sure we did all our work correctly first.
         final int[] sequenceValues = sequence.getSequenceValues();
-        for (int index = 0; index < 8192; index++) {
+        for (int index = 0; index < samples; index++) {
             assertEquals(sequenceValues[index], index);
         }
 
@@ -74,10 +77,11 @@ public class DiscreteSystemParallelExecutorTest {
     @Test
     public void testSubmitAndDivideWork() throws ProcessingException {
         final DiscreteSystemParallelExecutor executor = new DiscreteSystemParallelExecutor(5, 100);
-        final Sequence sequence = new Sequence(8192);
+        final int samples = 16384;
+        final Sequence sequence = new Sequence(samples);
 
-        final Set<Integer> sequenceStarts = new HashSet<>();
-        final Set<Integer> sequenceEnds = new HashSet<>();
+        final Set<Integer> sequenceStarts = Collections.newSetFromMap(new ConcurrentHashMap<>());
+        final Set<Integer> sequenceEnds = Collections.newSetFromMap(new ConcurrentHashMap<>());
 
         executor.execute(new DiscreteSystemWorker() {
 
@@ -88,6 +92,47 @@ public class DiscreteSystemParallelExecutorTest {
 
                 sequenceStarts.add(sequence.getStart());
                 sequenceEnds.add(sequence.getEnd());
+                for (int index = sequence.getStart(); index <= sequence.getEnd(); index++) {
+                    sequenceValues[index] = index;
+                }
+            }
+        }, sequence);
+
+        // Make sure we did all our work correctly first.
+        final int[] sequenceValues = sequence.getSequenceValues();
+        for (int index = 0; index < samples; index++) {
+            assertEquals(sequenceValues[index], index);
+        }
+
+        // Make sure it was divided up the way we expected.
+        assertTrue(sequenceStarts.contains(0));
+        assertTrue(sequenceEnds.contains(3276));
+        assertTrue(sequenceStarts.contains(3277));
+        assertTrue(sequenceEnds.contains(6553));
+        assertTrue(sequenceStarts.contains(6554));
+        assertTrue(sequenceEnds.contains(9830));
+        assertTrue(sequenceStarts.contains(9831));
+        assertTrue(sequenceEnds.contains(13107));
+        assertTrue(sequenceStarts.contains(13108));
+        assertTrue(sequenceEnds.contains(16383));
+    }
+
+    @Test
+    public void testSmallSampleSizeSingleThread() throws ProcessingException {
+        final DiscreteSystemParallelExecutor executor = new DiscreteSystemParallelExecutor(5, 8001);
+        final int samples = 8000;
+        final Sequence sequence = new Sequence(samples);
+
+        final AtomicInteger threadCount = new AtomicInteger(0);
+
+        executor.execute(new DiscreteSystemWorker() {
+
+            @Override
+            public void operate(Sequence... sequences) {
+                final Sequence sequence = sequences[0];
+                final int[] sequenceValues = sequence.getSequenceValues();
+
+                threadCount.incrementAndGet();
 
                 for (int index = sequence.getStart(); index <= sequence.getEnd(); index++) {
                     sequenceValues[index] = index;
@@ -97,21 +142,11 @@ public class DiscreteSystemParallelExecutorTest {
 
         // Make sure we did all our work correctly first.
         final int[] sequenceValues = sequence.getSequenceValues();
-        for (int index = 0; index < 8192; index++) {
+        for (int index = 0; index < samples; index++) {
             assertEquals(sequenceValues[index], index);
         }
 
-        // Make sure it was divided up the way we expected.
-        assertTrue(sequenceStarts.contains(0));
-        assertTrue(sequenceEnds.contains(1638));
-        assertTrue(sequenceStarts.contains(1639));
-        assertTrue(sequenceEnds.contains(3277));
-        assertTrue(sequenceStarts.contains(3278));
-        assertTrue(sequenceEnds.contains(4916));
-        assertTrue(sequenceStarts.contains(4917));
-        assertTrue(sequenceEnds.contains(6555));
-        assertTrue(sequenceStarts.contains(6556));
-        assertTrue(sequenceEnds.contains(8191));
+        assertEquals(threadCount.get(), 1);
     }
 
     // Goofy thing for helping to characterize performance.

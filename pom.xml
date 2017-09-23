@@ -40,7 +40,12 @@
 				<groupId>org.testng</groupId>
 				<artifactId>testng</artifactId>
 				<version>6.8</version>
-				<scope>test</scope>
+				<scope>compile</scope>
+			</dependency>
+			<dependency>
+				<groupId>org.slf4j</groupId>
+				<artifactId>slf4j-log4j12</artifactId>
+				<version>1.7.25</version>
 			</dependency>
 		</dependencies>
 	</dependencyManagement>
@@ -49,6 +54,10 @@
 		<dependency>
 			<groupId>org.testng</groupId>
 			<artifactId>testng</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>org.slf4j</groupId>
+			<artifactId>slf4j-log4j12</artifactId>
 		</dependency>
 	</dependencies>
 

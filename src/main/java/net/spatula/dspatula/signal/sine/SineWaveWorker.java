@@ -31,7 +31,7 @@ public final class SineWaveWorker implements DiscreteSystemWorker {
 
         for (int sampleNumber = sequence.getStart(); sampleNumber <= sequence.getEnd(); sampleNumber++) {
             sequenceValues[sampleNumber] = (int) (amplitude
-                    * Math.sin(2 * Math.PI * frequency / (double) sampleRate + phaseOffset));
+                    * Math.sin(2 * Math.PI * frequency * sampleNumber / sampleRate + phaseOffset));
         }
     }
 

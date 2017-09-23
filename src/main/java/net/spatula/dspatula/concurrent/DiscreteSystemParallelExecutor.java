@@ -29,7 +29,7 @@ public class DiscreteSystemParallelExecutor {
     protected final int minimumDivisionSize;
     protected ExecutorService threadPool;
     
-    protected static DiscreteSystemParallelExecutor instance;
+    private static DiscreteSystemParallelExecutor instance;
 
     private static final Logger LOG = LoggerFactory.getLogger(DiscreteSystemParallelExecutor.class);
     private static final int DEFAULT_MIN_DIVISION_SIZE = 8820;  // Magic number found empirically to be ~8500

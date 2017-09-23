@@ -1,5 +1,7 @@
 package net.spatula.dspatula.time.sequence;
 
+import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
+
 /**
  * Represents a Discrete-Time Signal Sequence. This is mostly just a convenient wrapper around
  * an integer buffer that contains the actual signal sequence values, with some helpful bookkeeping.
@@ -31,6 +33,7 @@ public class Sequence {
         this.length = (end - start) + 1;
     }
 
+    @SuppressFBWarnings("EI_EXPOSE_REP") // We accept the risk for the sake of performance
     public int[] getSequenceValues() {
         return sequenceValues;
     }

@@ -17,7 +17,7 @@ public class SineWaveSignalGeneratorTest {
     
     private void sineWave(int sampleRate, double frequency, int amplitude, double phaseOffset, int[] buffer) {
         for (int i = 0; i < buffer.length; i++) {
-            double value = amplitude * Math.sin(2 * Math.PI * frequency / (double)sampleRate + phaseOffset);
+            double value = amplitude * Math.sin(2 * Math.PI * frequency * i / sampleRate + phaseOffset);
             buffer[i] = (int)value;
         }
     }

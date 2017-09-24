@@ -15,7 +15,7 @@ public class FastMathTest {
             final double javaMath = Math.sin(radians);
             final double fastMath = FastMath.sin(radians);
             final double difference = Math.abs(javaMath - fastMath);
-            assertTrue(difference < 0.00005);
+            assertTrue(difference < 0.00001, "Failure at " + radians + ", difference=" + difference);
         }
     }
 
@@ -28,7 +28,7 @@ public class FastMathTest {
             final double javaMath = Math.cos(radians);
             final double fastMath = FastMath.cos(radians);
             final double difference = Math.abs(javaMath - fastMath);
-            assertTrue(difference < 0.00005, "Failure at " + radians + ", difference=" + difference);
+            assertTrue(difference < 0.00001, "Failure at " + radians + ", difference=" + difference);
         }
     }
 

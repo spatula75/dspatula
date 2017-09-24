@@ -12,13 +12,15 @@ public final class FastMath {
 
     }
 
-    private static final int SINE_TABLE_SIZE = 4096;
+    private static final int SINE_TABLE_SIZE = 2224;
     private static final double[] sineTable = new double[SINE_TABLE_SIZE];
-    private static final double PI = Math.PI;
+    public static final double PI = Math.PI;
+    public static final double TWO_PI = 2 * PI;
+    public static final double HALF_PI = PI/2;
 
     static {
         for (int i = 0; i < SINE_TABLE_SIZE; i++) {
-            sineTable[i] = Math.sin(2 * PI * i / SINE_TABLE_SIZE);
+            sineTable[i] = Math.sin(TWO_PI * i / SINE_TABLE_SIZE);
         }
     }
 
@@ -29,7 +31,7 @@ public final class FastMath {
      * @return the sine of the value
      */
     public static double sin(double radians) {
-        final double bucket = (radians * (SINE_TABLE_SIZE / (2 * PI)));
+        final double bucket = (radians * (SINE_TABLE_SIZE / TWO_PI));
         int wholeBucket = (int) bucket;
         
         final double fractionalBucket = (bucket - wholeBucket); // preserves just the fraction
@@ -54,7 +56,7 @@ public final class FastMath {
      * @return the cosine of the value
      */
     public static double cos(double radians) {
-        return sin(radians + (PI / 2));
+        return sin(radians + HALF_PI);
     }
 
 }

@@ -5,7 +5,7 @@ import net.spatula.dspatula.examples.sequence.AbstractSequenceChart;
 import net.spatula.dspatula.exception.ProcessingException;
 import net.spatula.dspatula.signal.sine.SineWaveSignalGenerator;
 import net.spatula.dspatula.system.ConstantMultiplier;
-import net.spatula.dspatula.time.sequence.Sequence;
+import net.spatula.dspatula.time.sequence.RealSequence;
 
 public class ConstantMultiplySineWaves extends AbstractSequenceChart {
 
@@ -16,9 +16,9 @@ public class ConstantMultiplySineWaves extends AbstractSequenceChart {
     }
 
     @Override
-    protected Sequence getSequence() throws ProcessingException {
+    protected RealSequence getSequence() throws ProcessingException {
         final SineWaveSignalGenerator generator = new SineWaveSignalGenerator(8000);
-        final Sequence seq60Hz = generator.generate(60, 0.075, 32767, 0);
+        final RealSequence seq60Hz = generator.generate(60, 0.075, 32767, 0);
         DiscreteSystemParallelExecutor.getDefaultInstance().execute(new ConstantMultiplier(.25D), seq60Hz);
         return seq60Hz; // now divided by 4
     }

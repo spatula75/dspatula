@@ -1,7 +1,9 @@
 package net.spatula.dspatula.system;
 
+import java.util.List;
+
 import net.spatula.dspatula.concurrent.DiscreteSystemWorker;
-import net.spatula.dspatula.time.sequence.Sequence;
+import net.spatula.dspatula.time.sequence.RealSequence;
 
 /**
  * Base class for Discrete Systems which apply a constant value to all elements of a Sequence.
@@ -9,7 +11,7 @@ import net.spatula.dspatula.time.sequence.Sequence;
  * @author spatula
  *
  */
-public abstract class AbstractConstantSystem<T> implements DiscreteSystemWorker {
+public abstract class AbstractConstantSystem<T> implements DiscreteSystemWorker<RealSequence> {
 
     protected final T value;
 
@@ -18,11 +20,11 @@ public abstract class AbstractConstantSystem<T> implements DiscreteSystemWorker 
     }
 
     @Override
-    public void operate(Sequence... sequences) {
-        final Sequence sequence = sequences[0];
+    public void operate(List<RealSequence> sequences) {
+        final RealSequence sequence = sequences.get(0);
         final int start = sequence.getStart();
         final int end = sequence.getEnd();
-        final int[] values = sequence.getSequenceValues();
+        final int[] values = sequence.getRealValues();
 
         operate(start, end, values);
     }

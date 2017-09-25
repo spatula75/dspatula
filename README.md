@@ -61,3 +61,18 @@ recommends against giving in to the temptation to connect the points with line s
 the values between points.  To that end, we configure JFreeChart to render a scatter plot using small circles.
 
 I've opted to leave the implementation of Summation and Unit Delay until the chapter on filters when they're needed.
+
+### Chapter Three (The Discrete Fourier Transform)
+
+*SummationParallelExecutor* plays an important role in reducing the time taken by this O(n^2) algorithm by running summations
+simultaneously on all your cores via the *CoreAwareParallelExecutor*.  Analgous to the *DiscreteSystemWorker* is the
+*SummationWorker* which accepts as its input the summation point it is working on, the input sequences, and the sequence 
+to use to store its results.
+
+Note that some typical Java conventions are sacrificed somewhat for the sake of performance; notably, we're pre-allocating
+our Sequences (arrays) and passing those in to the methods that use them, rather than passing around results and copying things.
+
+We also introduce the *DiscreteFourierTransformer* and the *DFTSummationWorker*. The actual effort of the DFT is performed in the
+*DFTSummationWorker* with the aid of the *SummationParallelExecutor*.  Advantage is taken of the symmetry of the DFT. Only the
+first half is calculated, and then the symmetric results are populated, also in parallel on as many cores as we're using, using
+a little bit of a cheat with the DiscreteSystemParallelExecutor.

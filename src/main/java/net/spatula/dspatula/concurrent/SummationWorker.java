@@ -18,8 +18,8 @@ import net.spatula.dspatula.time.sequence.Sequence;
  * @author spatula
  *
  */
-public interface DiscreteSystemWorker<T extends Sequence<T>> {
+public interface SummationWorker<T extends Sequence<T>, V extends Sequence<V>> {
 
-    void operate(List<T> sequences);
+    void operate(int index, List<T> inputSequences, V outputSequence);
 
 }

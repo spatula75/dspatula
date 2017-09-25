@@ -2,7 +2,7 @@ package net.spatula.dspatula.util;
 
 /**
  * Faster versions of some common Java Math.* functions, at the expense of some accuracy.
- * 
+ *
  * @author spatula
  *
  */
@@ -16,24 +16,24 @@ public final class FastMath {
     private static final double[] sineTable = new double[SINE_TABLE_SIZE];
     public static final double PI = Math.PI;
     public static final double TWO_PI = 2 * PI;
-    public static final double HALF_PI = PI/2;
+    public static final double HALF_PI = PI / 2;
 
     static {
         for (int i = 0; i < SINE_TABLE_SIZE; i++) {
-            sineTable[i] = Math.sin(TWO_PI * i / SINE_TABLE_SIZE);
+            sineTable[i] = Math.sin(i * TWO_PI / SINE_TABLE_SIZE); // range 0 - two_pi
         }
     }
 
     /**
-     * Fast, table-lookup-based sine function, expected to be accurate to within 0.00005 in most cases.
-     * 
+     * Fast, table-lookup-based sine function, expected to be accurate to within 0.00001 in most cases.
+     *
      * @param radians
      * @return the sine of the value
      */
     public static double sin(double radians) {
         final double bucket = (radians * (SINE_TABLE_SIZE / TWO_PI));
         int wholeBucket = (int) bucket;
-        
+
         final double fractionalBucket = (bucket - wholeBucket); // preserves just the fraction
         wholeBucket %= SINE_TABLE_SIZE; // sine is periodic, and we store one full period in our table
 
@@ -50,8 +50,8 @@ public final class FastMath {
     }
 
     /**
-     * Fast, table-lookup-based cosine function, expected to be accurate to within 0.00005 in most cases.
-     * 
+     * Fast, table-lookup-based cosine function, expected to be accurate to within 0.00001 in most cases.
+     *
      * @param radians
      * @return the cosine of the value
      */

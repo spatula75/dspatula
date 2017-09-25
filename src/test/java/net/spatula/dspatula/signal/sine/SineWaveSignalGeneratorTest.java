@@ -5,7 +5,7 @@ import static org.testng.Assert.assertEquals;
 import org.testng.annotations.Test;
 
 import net.spatula.dspatula.exception.ProcessingException;
-import net.spatula.dspatula.time.sequence.Sequence;
+import net.spatula.dspatula.time.sequence.RealSequence;
 import net.spatula.dspatula.util.FastMath;
 
 public class SineWaveSignalGeneratorTest {
@@ -27,11 +27,11 @@ public class SineWaveSignalGeneratorTest {
     public void testCreateSimpleSineWave() throws ProcessingException {
         final SineWaveSignalGenerator generator = new SineWaveSignalGenerator(44100);
 
-        final Sequence generated = generator.generate(1000D, 1D, 32767, 0D);
+        final RealSequence generated = generator.generate(1000D, 1D, 32767, 0D);
         final int[] buffer = new int[44100];
         sineWave(44100, 1000D, 32767, 0D, buffer);
 
-        final int[] generatedValues = generated.getSequenceValues();
+        final int[] generatedValues = generated.getRealValues();
 
         assertEquals(generatedValues.length, buffer.length);
         for (int i = 0; i < buffer.length; i++) {

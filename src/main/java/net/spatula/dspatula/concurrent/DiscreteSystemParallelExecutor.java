@@ -1,12 +1,12 @@
 package net.spatula.dspatula.concurrent;
 
-import java.lang.Thread.UncaughtExceptionHandler;
 import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
 import java.util.concurrent.Callable;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
-import java.util.concurrent.ThreadFactory;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.Future;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -25,38 +25,17 @@ import net.spatula.dspatula.time.sequence.Sequence;
  */
 public class DiscreteSystemParallelExecutor {
 
-    protected final int cores;
     protected final int minimumDivisionSize;
-    protected ExecutorService threadPool;
-
+    protected CoreAwareParallelExecutor executor;
     private static DiscreteSystemParallelExecutor instance;
 
     private static final Logger LOG = LoggerFactory.getLogger(DiscreteSystemParallelExecutor.class);
+
     private static final int DEFAULT_MIN_DIVISION_SIZE = 8820; // Magic number found empirically to be ~8500
 
-    protected DiscreteSystemParallelExecutor(int cores, int minimumDivisionSize) {
-        this.cores = cores;
+    protected DiscreteSystemParallelExecutor(CoreAwareParallelExecutor executor, int minimumDivisionSize) {
         this.minimumDivisionSize = minimumDivisionSize;
-
-        threadPool = Executors.newFixedThreadPool(cores, new ThreadFactory() {
-
-            private volatile int threadNumber = 1;
-
-            @Override
-            public Thread newThread(Runnable runnable) {
-                final Thread thread = new Thread(runnable, "DiscreteSystemParallelExecutor-threadPool-" + (threadNumber++));
-                thread.setUncaughtExceptionHandler(new UncaughtExceptionHandler() {
-
-                    @Override
-                    public void uncaughtException(Thread thread, Throwable throwable) {
-                        LOG.error("Uncaught exception in thread {}", thread.getName(), throwable);
-                    }
-                });
-                LOG.trace("Created thread {}", thread.getName());
-                return thread;
-            }
-        });
-        LOG.debug("Created a parallel execution environment using {} threads", cores);
+        this.executor = executor;
     }
 
     /**
@@ -68,32 +47,27 @@ public class DiscreteSystemParallelExecutor {
         if (instance != null) {
             return instance;
         }
-        final int availableProcessors = Runtime.getRuntime().availableProcessors();
-        instance = new DiscreteSystemParallelExecutor(calculateNumberOfCores(availableProcessors), DEFAULT_MIN_DIVISION_SIZE);
+        instance = new DiscreteSystemParallelExecutor(CoreAwareParallelExecutor.getInstance(), DEFAULT_MIN_DIVISION_SIZE);
 
         return instance;
     }
 
-    protected synchronized static DiscreteSystemParallelExecutor getInstance(int cores) {
+    protected synchronized static DiscreteSystemParallelExecutor getInstance(CoreAwareParallelExecutor executor) {
         if (instance != null) {
             return instance;
         }
 
-        instance = new DiscreteSystemParallelExecutor(cores, DEFAULT_MIN_DIVISION_SIZE);
+        instance = new DiscreteSystemParallelExecutor(executor, DEFAULT_MIN_DIVISION_SIZE);
 
         return instance;
     }
 
-    protected static int calculateNumberOfCores(int availableProcessors) {
-        return Math.max(availableProcessors - 2, 1);
-    }
+    private static class WorkerSequenceCallable<T extends Sequence<T>> implements Callable<Void> {
 
-    private static class WorkerSequenceCallable implements Callable<Void> {
+        private final DiscreteSystemWorker<T> discreteSystemWorker;
+        private final List<T> sequences;
 
-        private final DiscreteSystemWorker discreteSystemWorker;
-        private final Sequence[] sequences;
-
-        private WorkerSequenceCallable(DiscreteSystemWorker discreteSystemWorker, Sequence... sequences) {
+        private WorkerSequenceCallable(DiscreteSystemWorker<T> discreteSystemWorker, List<T> sequences) {
             this.sequences = sequences;
             this.discreteSystemWorker = discreteSystemWorker;
         }
@@ -127,35 +101,47 @@ public class DiscreteSystemParallelExecutor {
      * @throws ProcessingException
      *             If errors occur while running the job
      */
-    public void execute(final DiscreteSystemWorker discreteSystemWorker, Sequence... sequences) throws ProcessingException {
+    public <T extends Sequence<T>> void execute(final DiscreteSystemWorker<T> discreteSystemWorker,
+            @SuppressWarnings("unchecked") T... sequences) throws ProcessingException {
         final int firstSequenceLength = sequences[0].getLength();
         final int firstSequenceEnd = sequences[0].getEnd();
 
         if (firstSequenceLength < minimumDivisionSize) {
-            discreteSystemWorker.operate(sequences);
+            discreteSystemWorker.operate(Collections.unmodifiableList(Arrays.asList(sequences)));
             return;
         }
 
-        final int chunkSize = (int) Math.ceil((double) sequences[0].getLength() / (double) cores);
+        final int chunkSize = (int) Math.ceil((double) sequences[0].getLength() / (double) executor.getCoreCount());
 
-        final List<Callable<Void>> callables = new ArrayList<>(cores);
+        final List<Callable<Void>> callables = new ArrayList<>(executor.getCoreCount());
         for (int start = 0; start <= firstSequenceEnd; start += chunkSize) {
             final int end = Math.min(start + chunkSize - 1, firstSequenceEnd);
 
-            final Sequence[] subsequences = new Sequence[sequences.length];
+            final List<T> subsequences = new ArrayList<>(sequences.length);
+
             for (int seqNum = 0; seqNum < sequences.length; seqNum++) {
                 if (sequences[seqNum].getLength() < firstSequenceLength) {
-                    subsequences[seqNum] = sequences[seqNum];
+                    subsequences.add(seqNum, sequences[seqNum]);
                 } else {
-                    subsequences[seqNum] = sequences[seqNum].subsequence(start, end);
+                    subsequences.add(seqNum, sequences[seqNum].subsequence(start, end));
                 }
             }
 
-            callables.add(new WorkerSequenceCallable(discreteSystemWorker, subsequences));
+            callables.add(new WorkerSequenceCallable<T>(discreteSystemWorker, Collections.unmodifiableList(subsequences)));
+            LOG.debug("Created work for " + start + " - " + end);
         }
 
         try {
-            threadPool.invokeAll(callables);
+            final List<Future<Void>> futures = executor.invokeAll(callables);
+            for (final Future<Void> future : futures) {
+                try {
+                    future.get();
+                } catch (final ExecutionException e) {
+                    LOG.error("Exception during execution", e);
+                    throw new ProcessingException("Internal error", e);
+                }
+
+            }
         } catch (final InterruptedException e) {
             throw new ProcessingException("Interrupted", e);
         }

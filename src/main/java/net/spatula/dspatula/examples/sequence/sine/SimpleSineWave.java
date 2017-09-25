@@ -3,7 +3,7 @@ package net.spatula.dspatula.examples.sequence.sine;
 import net.spatula.dspatula.examples.sequence.AbstractSequenceChart;
 import net.spatula.dspatula.exception.ProcessingException;
 import net.spatula.dspatula.signal.sine.SineWaveSignalGenerator;
-import net.spatula.dspatula.time.sequence.Sequence;
+import net.spatula.dspatula.time.sequence.RealSequence;
 
 public class SimpleSineWave extends AbstractSequenceChart {
 
@@ -14,7 +14,7 @@ public class SimpleSineWave extends AbstractSequenceChart {
     }
 
     @Override
-    protected Sequence getSequence() throws ProcessingException {
+    protected RealSequence getSequence() throws ProcessingException {
         final SineWaveSignalGenerator generator = new SineWaveSignalGenerator(8000);
         return generator.generate(60, 0.075, 32767, 0);
     }

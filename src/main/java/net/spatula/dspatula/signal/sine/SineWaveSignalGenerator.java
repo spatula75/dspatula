@@ -5,7 +5,7 @@ import java.math.RoundingMode;
 
 import net.spatula.dspatula.concurrent.DiscreteSystemParallelExecutor;
 import net.spatula.dspatula.exception.ProcessingException;
-import net.spatula.dspatula.time.sequence.Sequence;
+import net.spatula.dspatula.time.sequence.RealSequence;
 
 public class SineWaveSignalGenerator {
 
@@ -34,11 +34,11 @@ public class SineWaveSignalGenerator {
      * @throws ProcessingException
      *             If errors are encountered during execution
      */
-    public Sequence generate(double frequency, double duration, int amplitude, double phaseOffset) throws ProcessingException {
+    public RealSequence generate(double frequency, double duration, int amplitude, double phaseOffset) throws ProcessingException {
         // Do this calculation with BigDecimal, to avoid float error values like 44100.0000000001 getting rounded up to 44101.
         final int sequenceLength = BigDecimal.valueOf(duration).multiply(BigDecimal.valueOf(sampleRate))
                 .setScale(0, RoundingMode.CEILING).intValue();
-        final Sequence sequence = new Sequence(sequenceLength);
+        final RealSequence sequence = new RealSequence(sequenceLength);
 
         final SineWaveWorker discreteSystemWorker = new SineWaveWorker(sampleRate, frequency, amplitude, phaseOffset);
         DiscreteSystemParallelExecutor.getDefaultInstance().execute(discreteSystemWorker, sequence);

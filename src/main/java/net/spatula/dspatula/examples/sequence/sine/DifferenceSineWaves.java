@@ -5,7 +5,7 @@ import net.spatula.dspatula.examples.sequence.AbstractSequenceChart;
 import net.spatula.dspatula.exception.ProcessingException;
 import net.spatula.dspatula.signal.sine.SineWaveSignalGenerator;
 import net.spatula.dspatula.system.Subtracter;
-import net.spatula.dspatula.time.sequence.Sequence;
+import net.spatula.dspatula.time.sequence.RealSequence;
 
 public class DifferenceSineWaves extends AbstractSequenceChart {
 
@@ -16,10 +16,10 @@ public class DifferenceSineWaves extends AbstractSequenceChart {
     }
 
     @Override
-    protected Sequence getSequence() throws ProcessingException {
+    protected RealSequence getSequence() throws ProcessingException {
         final SineWaveSignalGenerator generator = new SineWaveSignalGenerator(8000);
-        final Sequence seq60Hz = generator.generate(60, 0.075, 16383, 0);
-        final Sequence seq30Hz = generator.generate(30, 0.075, 16383, 0);
+        final RealSequence seq60Hz = generator.generate(60, 0.075, 16383, 0);
+        final RealSequence seq30Hz = generator.generate(30, 0.075, 16383, 0);
         DiscreteSystemParallelExecutor.getDefaultInstance().execute(new Subtracter(), seq60Hz, seq30Hz);
         return seq60Hz; // now has had 30Hz subtracted from it.
     }

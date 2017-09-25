@@ -1,7 +1,9 @@
 package net.spatula.dspatula.system;
 
+import java.util.List;
+
 import net.spatula.dspatula.concurrent.DiscreteSystemWorker;
-import net.spatula.dspatula.time.sequence.Sequence;
+import net.spatula.dspatula.time.sequence.RealSequence;
 
 /**
  * Base class for Discrete Systems which take as inputs two signals of equal length.
@@ -12,17 +14,17 @@ import net.spatula.dspatula.time.sequence.Sequence;
  * @author spatula
  *
  */
-public abstract class AbstractCongruentSystem implements DiscreteSystemWorker {
+public abstract class AbstractCongruentSystem implements DiscreteSystemWorker<RealSequence> {
 
     @Override
-    public void operate(Sequence... sequences) {
-        final Sequence first = sequences[0];
-        final Sequence second = sequences[1];
+    public void operate(List<RealSequence> sequences) {
+        final RealSequence first = sequences.get(0);
+        final RealSequence second = sequences.get(1);
         final int start = first.getStart();
         final int end = first.getEnd();
 
-        final int[] destinationValues = first.getSequenceValues();
-        final int[] addValues = second.getSequenceValues();
+        final int[] destinationValues = first.getRealValues();
+        final int[] addValues = second.getRealValues();
         operate(start, end, destinationValues, addValues);
     }
 

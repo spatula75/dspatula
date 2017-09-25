@@ -16,7 +16,7 @@ import org.jfree.ui.ApplicationFrame;
 import org.jfree.ui.RefineryUtilities;
 
 import net.spatula.dspatula.exception.ProcessingException;
-import net.spatula.dspatula.time.sequence.Sequence;
+import net.spatula.dspatula.time.sequence.RealSequence;
 
 public abstract class AbstractSequenceChart extends ApplicationFrame {
 
@@ -25,7 +25,7 @@ public abstract class AbstractSequenceChart extends ApplicationFrame {
     private final String xAxisTitle;
     private final String yAxisTitle;
 
-    protected abstract Sequence getSequence() throws ProcessingException;
+    protected abstract RealSequence getSequence() throws ProcessingException;
 
     protected AbstractSequenceChart(String title, String plotName, String xAxisTitle, String yAxisTitle)
             throws ProcessingException {
@@ -45,10 +45,10 @@ public abstract class AbstractSequenceChart extends ApplicationFrame {
     private void initChart() throws ProcessingException {
         final XYSeries series = new XYSeries("Sequence");
 
-        final Sequence sequence = getSequence();
+        final RealSequence sequence = getSequence();
 
-        for (int i = 0; i < sequence.getSequenceValues().length; i++) {
-            final int value = sequence.getSequenceValues()[i];
+        for (int i = 0; i < sequence.getRealValues().length; i++) {
+            final int value = sequence.getRealValues()[i];
             series.add(i, value);
         }
 

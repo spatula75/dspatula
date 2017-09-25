@@ -1,5 +1,7 @@
 package net.spatula.dspatula.time.sequence;
 
+import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
+
 /**
  * Represents a Discrete-Time Signal Sequence of Complex numbers, with underlying arrays of the real parts and the imaginary parts.
  *
@@ -34,10 +36,16 @@ public class ComplexSequence extends AbstractSequence<ComplexSequence> {
      * 
      * @return
      */
+    @SuppressFBWarnings("EI_EXPOSE_REP") // We accept the risk for the sake of performance
     public int[] getImaginaryValues() {
         return imaginaryValues;
     }
 
+    /**
+     * Return the underlying array of the real components of the Discrete-Time Signal Sequence.
+     * @return
+     */
+    @SuppressFBWarnings("EI_EXPOSE_REP") // We accept the risk for the sake of performance
     public int[] getRealValues() {
         return realValues;
     }

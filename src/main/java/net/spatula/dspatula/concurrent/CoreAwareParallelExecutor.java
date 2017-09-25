@@ -26,20 +26,28 @@ public class CoreAwareParallelExecutor {
 
     private static final Logger LOG = LoggerFactory.getLogger(CoreAwareParallelExecutor.class);
 
-    private static class CustomThreadFactory implements ThreadFactory {
+    private static final class LoggingUncaughtExceptionHandler implements UncaughtExceptionHandler {
+
+        private final Logger logger;
+
+        private LoggingUncaughtExceptionHandler(Logger logger) {
+            this.logger = logger;
+        }
+        
+        @Override
+        public void uncaughtException(Thread t, Throwable e) {
+            logger.error("Uncaught exception in thread {}", t.getName(), e);
+        }
+    }
+    
+    private static final class CustomThreadFactory implements ThreadFactory {
         private static final Logger LOG = LoggerFactory.getLogger(CustomThreadFactory.class);
         private volatile int threadNumber = 1;
 
         @Override
         public Thread newThread(Runnable runnable) {
             final Thread thread = new Thread(runnable, "CoreAwareParallelExecutor-threadPool-" + (threadNumber++));
-            thread.setUncaughtExceptionHandler(new UncaughtExceptionHandler() {
-
-                @Override
-                public void uncaughtException(Thread thread, Throwable throwable) {
-                    LOG.error("Uncaught exception in thread {}", thread.getName(), throwable);
-                }
-            });
+            thread.setUncaughtExceptionHandler(new LoggingUncaughtExceptionHandler(LOG));
             LOG.trace("Created thread {}", thread.getName());
             return thread;
         }

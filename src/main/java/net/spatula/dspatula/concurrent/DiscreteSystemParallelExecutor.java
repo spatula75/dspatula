@@ -103,6 +103,7 @@ public class DiscreteSystemParallelExecutor {
      */
     public <T extends Sequence<T>> void execute(final DiscreteSystemWorker<T> discreteSystemWorker,
             @SuppressWarnings("unchecked") T... sequences) throws ProcessingException {
+        final int firstSequenceStart = sequences[0].getStart();
         final int firstSequenceLength = sequences[0].getLength();
         final int firstSequenceEnd = sequences[0].getEnd();
 
@@ -114,7 +115,7 @@ public class DiscreteSystemParallelExecutor {
         final int chunkSize = (int) Math.ceil((double) sequences[0].getLength() / (double) executor.getCoreCount());
 
         final List<Callable<Void>> callables = new ArrayList<>(executor.getCoreCount());
-        for (int start = 0; start <= firstSequenceEnd; start += chunkSize) {
+        for (int start = firstSequenceStart; start <= firstSequenceEnd; start += chunkSize) {
             final int end = Math.min(start + chunkSize - 1, firstSequenceEnd);
 
             final List<T> subsequences = new ArrayList<>(sequences.length);
@@ -128,7 +129,6 @@ public class DiscreteSystemParallelExecutor {
             }
 
             callables.add(new WorkerSequenceCallable<T>(discreteSystemWorker, Collections.unmodifiableList(subsequences)));
-            LOG.debug("Created work for " + start + " - " + end);
         }
 
         try {

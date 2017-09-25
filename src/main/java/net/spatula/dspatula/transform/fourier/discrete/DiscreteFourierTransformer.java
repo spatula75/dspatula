@@ -3,6 +3,9 @@ package net.spatula.dspatula.transform.fourier.discrete;
 import java.util.Arrays;
 import java.util.List;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import net.spatula.dspatula.concurrent.DiscreteSystemParallelExecutor;
 import net.spatula.dspatula.concurrent.DiscreteSystemWorker;
 import net.spatula.dspatula.concurrent.SummationParallelExecutor;
@@ -17,7 +20,8 @@ import net.spatula.dspatula.time.sequence.RealSequence;
  *
  */
 public class DiscreteFourierTransformer {
-
+ 
+    private static final Logger LOG = LoggerFactory.getLogger(DiscreteFourierTransformer.class);
     /**
      * Calculate the forward DFT of a RealSequence, returning the result as a ComplexSequence containing both the real and imaginary
      * components of the frequency domain.
@@ -28,11 +32,10 @@ public class DiscreteFourierTransformer {
      */
     public ComplexSequence forward(RealSequence sequence) throws ProcessingException {
         final int points = sequence.getLength();
-        final ComplexSequence result = new ComplexSequence(sequence.getLength());
+        final ComplexSequence result = new ComplexSequence(points);
         final int independentPoints = (points % 2 == 0) ? points / 2 + 1 : (points + 1) / 2;
 
         SummationParallelExecutor.getDefaultInstance().execute(new DFTSummationWorker(), Arrays.asList(sequence), result);
-
         // Symmetry
         // We don't need to bother with the sampleIndex math from above, because we're operating
         // on the new Frequency Domain sequence here, which always starts at 0 and has a number of points
@@ -44,6 +47,7 @@ public class DiscreteFourierTransformer {
 
         // Let's also do our symmetry in parallel on many cores. Why not.
         final ComplexSequence symmetricSequence = result.subsequence(independentPoints, result.getEnd());
+        
         final DiscreteSystemParallelExecutor dsExecutor = DiscreteSystemParallelExecutor.getDefaultInstance();
         dsExecutor.execute(new DiscreteSystemWorker<ComplexSequence>() {
 

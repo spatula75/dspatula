@@ -71,7 +71,7 @@ public class CoreAwareParallelExecutor {
     }
 
     protected static int calculateNumberOfCores(int availableProcessors) {
-        return Math.max(availableProcessors - 2, 1);
+        return Math.max(availableProcessors - 1, 1);
     }
 
     public <T> List<Future<T>> invokeAll(Collection<? extends Callable<T>> tasks) throws InterruptedException {

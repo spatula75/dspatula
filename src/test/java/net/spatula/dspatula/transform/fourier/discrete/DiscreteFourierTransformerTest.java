@@ -74,4 +74,20 @@ public class DiscreteFourierTransformerTest {
         assertEquals(imaginaryValues[2], -1 * imaginaryValues[7]);
     }
 
+    @Test
+    public void testBigDft() throws ProcessingException {
+        final SineWaveSignalGenerator generator = new SineWaveSignalGenerator(22050);
+
+        final RealSequence real1kHz = generator.generate(1000, 1, 1000, 0);
+        assertEquals(real1kHz.getLength(), 22050);
+        
+        final DiscreteFourierTransformer transformer = new DiscreteFourierTransformer();
+        for (int i = 0; i < 2; i++) {
+            long start = System.currentTimeMillis();
+            final ComplexSequence frequencyDomainSequence = transformer.forward(real1kHz);
+            long end = System.currentTimeMillis();
+            System.out.println("22050 point DFT took " + (end-start) + "ms");
+        }
+    }
+
 }

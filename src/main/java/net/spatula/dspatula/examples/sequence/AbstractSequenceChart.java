@@ -16,16 +16,18 @@ import org.jfree.ui.ApplicationFrame;
 import org.jfree.ui.RefineryUtilities;
 
 import net.spatula.dspatula.exception.ProcessingException;
-import net.spatula.dspatula.time.sequence.RealSequence;
+import net.spatula.dspatula.time.sequence.Sequence;
 
-public abstract class AbstractSequenceChart extends ApplicationFrame {
+public abstract class AbstractSequenceChart<T extends Sequence<T>> extends ApplicationFrame {
 
     private static final long serialVersionUID = 1L;
-    private final String plotName;
-    private final String xAxisTitle;
-    private final String yAxisTitle;
+    protected final String plotName;
+    protected final String xAxisTitle;
+    protected final String yAxisTitle;
 
-    protected abstract RealSequence getSequence() throws ProcessingException;
+    protected abstract T getSequence() throws ProcessingException;
+
+    protected abstract void populateSeries(final XYSeries series) throws ProcessingException;
 
     protected AbstractSequenceChart(String title, String plotName, String xAxisTitle, String yAxisTitle)
             throws ProcessingException {
@@ -45,31 +47,34 @@ public abstract class AbstractSequenceChart extends ApplicationFrame {
     private void initChart() throws ProcessingException {
         final XYSeries series = new XYSeries("Sequence");
 
-        final RealSequence sequence = getSequence();
-
-        for (int i = 0; i < sequence.getRealValues().length; i++) {
-            final int value = sequence.getRealValues()[i];
-            series.add(i, value);
-        }
+        populateSeries(series);
 
         final XYSeriesCollection collection = new XYSeriesCollection(series);
 
-        final JFreeChart chart = ChartFactory.createScatterPlot(plotName, xAxisTitle, yAxisTitle, collection,
-                PlotOrientation.VERTICAL, false, false, false);
+        final JFreeChart chart = createPlot(collection);
         chart.setAntiAlias(true);
         chart.setTextAntiAlias(true);
 
-        // Make the scatter plot use small points instead of polygons.
+        configureRenderShape(chart);
+
+        final ChartPanel chartPanel = new ChartPanel(chart);
+        chartPanel.setPreferredSize(new java.awt.Dimension(1024, 512));
+        setContentPane(chartPanel);
+    }
+
+    protected void configureRenderShape(final JFreeChart chart) {
+        // Make the plot use small points instead of polygons.
         final Shape shape = new Ellipse2D.Double(0, 0, 2, 2);
         final XYPlot xyPlot = (XYPlot) chart.getPlot();
         final XYItemRenderer renderer = xyPlot.getRenderer();
         renderer.setBaseShape(shape);
         renderer.setBasePaint(Color.red);
         renderer.setSeriesShape(0, shape);
+    }
 
-        final ChartPanel chartPanel = new ChartPanel(chart);
-        chartPanel.setPreferredSize(new java.awt.Dimension(1024, 512));
-        setContentPane(chartPanel);
+    protected JFreeChart createPlot(final XYSeriesCollection collection) {
+        return ChartFactory.createScatterPlot(plotName, xAxisTitle, yAxisTitle, collection, PlotOrientation.VERTICAL, false, false,
+                false);
     }
 
 }

@@ -1,13 +1,13 @@
 package net.spatula.dspatula.examples.sequence.sine;
 
 import net.spatula.dspatula.concurrent.DiscreteSystemParallelExecutor;
-import net.spatula.dspatula.examples.sequence.AbstractSequenceChart;
+import net.spatula.dspatula.examples.sequence.AbstractRealSequenceChart;
 import net.spatula.dspatula.exception.ProcessingException;
 import net.spatula.dspatula.signal.sine.SineWaveSignalGenerator;
 import net.spatula.dspatula.system.Multiplier;
 import net.spatula.dspatula.time.sequence.RealSequence;
 
-public class MultiplySineWaves extends AbstractSequenceChart {
+public class MultiplySineWaves extends AbstractRealSequenceChart {
 
     private static final long serialVersionUID = 1L;
 

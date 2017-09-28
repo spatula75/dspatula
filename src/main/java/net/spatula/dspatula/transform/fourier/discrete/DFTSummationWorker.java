@@ -7,6 +7,12 @@ import net.spatula.dspatula.time.sequence.ComplexSequence;
 import net.spatula.dspatula.time.sequence.RealSequence;
 import net.spatula.dspatula.util.FastMath;
 
+/**
+ * Perform DFT for a point, applying no window to the Discrete-Time sequence.
+ * 
+ * @author spatula
+ *
+ */
 public class DFTSummationWorker implements SummationWorker<RealSequence, ComplexSequence> {
 
     @Override
@@ -16,18 +22,26 @@ public class DFTSummationWorker implements SummationWorker<RealSequence, Complex
         final int[] realValues = realSequence.getRealValues();
         final int[] resultReal = outputSequence.getRealValues();
         final int[] resultImaginary = outputSequence.getImaginaryValues();
-        final int points = outputSequence.getLength();
 
         double realSum = 0;
         double imaginarySum = 0;
+        final int sequenceStartIndex = realSequence.getStart();
         for (int sampleNumber = 0; sampleNumber < samples; sampleNumber++) {
-            final int sampleIndex = sampleNumber + realSequence.getStart();
-            final int sampleValue = realValues[sampleIndex];
-            realSum += sampleValue * FastMath.cos(FastMath.TWO_PI * sampleNumber * pointNumber / points);
-            imaginarySum += -1 * sampleValue * FastMath.sin(FastMath.TWO_PI * sampleNumber * pointNumber / points);
+            final int sampleIndex = sampleNumber + sequenceStartIndex;
+            final int sampleNumberDup = sampleNumber;
+            //@formatter:off
+            realSum += (
+                            realValues[sampleIndex]
+                       )
+                        * FastMath.cos(FastMath.TWO_PI * sampleNumberDup * pointNumber / samples);
+
+            imaginarySum -= (
+                                realValues[sampleIndex]
+                            )
+                             * FastMath.sin(FastMath.TWO_PI * sampleNumberDup * pointNumber / samples);
+            //@formatter:on
         }
         resultReal[pointNumber] = (int) realSum;
         resultImaginary[pointNumber] = (int) imaginarySum;
     }
-
 }

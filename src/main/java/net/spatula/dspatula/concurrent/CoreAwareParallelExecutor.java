@@ -14,7 +14,7 @@ import org.slf4j.LoggerFactory;
 
 /**
  * Wraps an ExecutorService with the fixed number of available threads set to the number of cores available to us on the platform.
- * 
+ *
  * @author spatula
  *
  */
@@ -33,13 +33,13 @@ public class CoreAwareParallelExecutor {
         private LoggingUncaughtExceptionHandler(Logger logger) {
             this.logger = logger;
         }
-        
+
         @Override
         public void uncaughtException(Thread t, Throwable e) {
             logger.error("Uncaught exception in thread {}", t.getName(), e);
         }
     }
-    
+
     private static final class CustomThreadFactory implements ThreadFactory {
         private static final Logger LOG = LoggerFactory.getLogger(CustomThreadFactory.class);
         private volatile int threadNumber = 1;

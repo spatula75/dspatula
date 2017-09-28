@@ -81,13 +81,26 @@ public class DiscreteFourierTransformerTest {
         final RealSequence real1kHz = generator.generate(1000, 1, 1000, 0);
         assertEquals(real1kHz.getLength(), 22050);
         
-        final DiscreteFourierTransformer transformer = new DiscreteFourierTransformer();
-        for (int i = 0; i < 2; i++) {
+        final DiscreteFourierTransformer transformer = new DiscreteFourierTransformer(new DFTHanningSummationWorker());
+        int min = Integer.MAX_VALUE;
+        int max = 0;
+        int sum = 0;
+        for (int i = 0; i < 10; i++) {
             long start = System.currentTimeMillis();
             final ComplexSequence frequencyDomainSequence = transformer.forward(real1kHz);
             long end = System.currentTimeMillis();
             System.out.println("22050 point DFT took " + (end-start) + "ms");
+            sum += end-start;
+            if (end - start < min) {
+                min = (int)(end - start);
+            }
+            if (end - start > max) {
+                max = (int)(end-start);
+            }
         }
+        System.out.println("Min execution time " + min);
+        System.out.println("Max execution time " + max);
+        System.out.println("Avg execution time " + sum / 10);
     }
 
 }

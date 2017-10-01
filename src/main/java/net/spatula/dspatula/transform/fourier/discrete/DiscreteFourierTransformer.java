@@ -42,7 +42,7 @@ public class DiscreteFourierTransformer {
         final ComplexSequence result = new ComplexSequence(points);
         final int independentPoints = (points % 2 == 0) ? points / 2 + 1 : (points + 1) / 2;
 
-        SummationParallelExecutor.getDefaultInstance().execute(worker, Arrays.asList(sequence), result);
+        SummationParallelExecutor.getDefaultInstance().executeForward(worker, Arrays.asList(sequence), result);
         // Symmetry
         // We don't need to bother with the sampleIndex math from above, because we're operating
         // on the new Frequency Domain sequence here, which always starts at 0 and has a number of points
@@ -78,6 +78,22 @@ public class DiscreteFourierTransformer {
                 }
             }
         }, symmetricSequence);
+
+        return result;
+    }
+
+    /**
+     * Calculate the inverse DFT of a ComplexSequence, returning the result as a RealSequence
+     *
+     * @param sequence
+     * @return
+     * @throws ProcessingException
+     */
+    public RealSequence inverse(ComplexSequence sequence) throws ProcessingException {
+        final int points = sequence.getLength();
+        final RealSequence result = new RealSequence(points);
+
+        SummationParallelExecutor.getDefaultInstance().executeInverse(worker, Arrays.asList(sequence), result);
 
         return result;
     }

@@ -43,7 +43,7 @@ public class ComplexSequence extends AbstractSequence<ComplexSequence> {
 
     /**
      * Return the underlying array of the real components of the Discrete-Time Signal Sequence.
-     * 
+     *
      * @return
      */
     @SuppressFBWarnings("EI_EXPOSE_REP") // We accept the risk for the sake of performance

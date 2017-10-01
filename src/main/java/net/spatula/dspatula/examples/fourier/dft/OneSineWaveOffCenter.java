@@ -1,10 +1,5 @@
 package net.spatula.dspatula.examples.fourier.dft;
 
-import org.jfree.chart.ChartFactory;
-import org.jfree.chart.JFreeChart;
-import org.jfree.chart.plot.PlotOrientation;
-import org.jfree.data.xy.XYSeriesCollection;
-
 import net.spatula.dspatula.examples.sequence.AbstractComplexSequenceChart;
 import net.spatula.dspatula.exception.ProcessingException;
 import net.spatula.dspatula.signal.sine.SineWaveSignalGenerator;
@@ -49,12 +44,6 @@ public class OneSineWaveOffCenter extends AbstractComplexSequenceChart {
     @Override
     protected double getXValue(int pointNumber) {
         return (SAMPLE_FREQUENCY * pointNumber) / SAMPLE_COUNT;
-    }
-
-    @Override
-    protected JFreeChart createPlot(final XYSeriesCollection collection) {
-        return ChartFactory.createXYBarChart(plotName, xAxisTitle, false, yAxisTitle, collection, PlotOrientation.VERTICAL, false,
-                false, false);
     }
 
     public static void main(String[] args) throws Exception {

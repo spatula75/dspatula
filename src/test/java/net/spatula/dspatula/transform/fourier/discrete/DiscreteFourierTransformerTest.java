@@ -1,6 +1,7 @@
 package net.spatula.dspatula.transform.fourier.discrete;
 
 import static org.testng.Assert.assertEquals;
+import static org.testng.Assert.assertTrue;
 
 import org.testng.annotations.Test;
 
@@ -33,10 +34,11 @@ public class DiscreteFourierTransformerTest {
         final int[] realValues = frequencyDomainSequence.getRealValues();
         final int[] imaginaryValues = frequencyDomainSequence.getImaginaryValues();
         assertEquals(realValues[1], 0);
-        assertEquals(imaginaryValues[1], -39999); // not exactly the "4" from the book, but there's some rounding error
+        assertEquals(imaginaryValues[1], -9999); // not exactly the "4" from the book, but there's some rounding error.
+                                                 // also we are scaling our values, so we need to divide by 4.
 
-        assertEquals(realValues[2], 14140);
-        assertEquals(imaginaryValues[2], 14140);
+        assertEquals(realValues[2], 3535);
+        assertEquals(imaginaryValues[2], 3535);
 
         assertEquals(realValues[3], 0);
         assertEquals(imaginaryValues[3], 0);
@@ -47,11 +49,33 @@ public class DiscreteFourierTransformerTest {
         assertEquals(realValues[5], 0);
         assertEquals(imaginaryValues[5], 0);
 
-        assertEquals(realValues[6], 14140);
-        assertEquals(imaginaryValues[6], -14140);
+        assertEquals(realValues[6], 3535);
+        assertEquals(imaginaryValues[6], -3535);
 
         assertEquals(realValues[7], 0);
-        assertEquals(imaginaryValues[7], 39999);
+        assertEquals(imaginaryValues[7], 9999);
+    }
+
+    @Test
+    public void testForwardInverse() throws ProcessingException {
+        final SineWaveSignalGenerator generator = new SineWaveSignalGenerator(8000);
+
+        // Generate 8 points of a 1000 Hz signal at 8000 samples per second.
+        final RealSequence real1kHz = generator.generate(1000, 8 / 8000D, 10000, 0);
+        final RealSequence real2kHz = generator.generate(2000, 8 / 8000D, 5000, (3 * FastMath.PI / 4D));
+        DiscreteSystemParallelExecutor.getDefaultInstance().execute(new Adder(), real1kHz, real2kHz);
+
+        // real1kHz has been summed with real2kHz at this point.
+        assertEquals(real1kHz.getLength(), 8);
+
+        final DiscreteFourierTransformer transformer = new DiscreteFourierTransformer();
+        final ComplexSequence frequencyDomainSequence = transformer.forward(real1kHz);
+        final RealSequence inverse = transformer.inverse(frequencyDomainSequence);
+
+        for (int i = 0; i < inverse.getLength(); i++) {
+            assertTrue(Math.abs(inverse.getRealValues()[i] - real1kHz.getRealValues()[i]) <= 1); // account for rounding error
+        }
+
     }
 
     @Test
@@ -74,33 +98,35 @@ public class DiscreteFourierTransformerTest {
         assertEquals(imaginaryValues[2], -1 * imaginaryValues[7]);
     }
 
-    @Test
+    @Test(enabled = false)
     public void testBigDft() throws ProcessingException {
         final SineWaveSignalGenerator generator = new SineWaveSignalGenerator(22050);
 
         final RealSequence real1kHz = generator.generate(1000, 1, 1000, 0);
         assertEquals(real1kHz.getLength(), 22050);
-        
-        final DiscreteFourierTransformer transformer = new DiscreteFourierTransformer(new DFTHanningSummationWorker());
+
+        final int trials = 3;
+
+        final DiscreteFourierTransformer transformer = new DiscreteFourierTransformer(new DFTSummationWorker());
         int min = Integer.MAX_VALUE;
         int max = 0;
         int sum = 0;
-        for (int i = 0; i < 10; i++) {
-            long start = System.currentTimeMillis();
+        for (int i = 0; i < trials; i++) {
+            final long start = System.currentTimeMillis();
             final ComplexSequence frequencyDomainSequence = transformer.forward(real1kHz);
-            long end = System.currentTimeMillis();
-            System.out.println("22050 point DFT took " + (end-start) + "ms");
-            sum += end-start;
+            final long end = System.currentTimeMillis();
+            System.out.println("22050 point DFT took " + (end - start) + "ms");
+            sum += end - start;
             if (end - start < min) {
-                min = (int)(end - start);
+                min = (int) (end - start);
             }
             if (end - start > max) {
-                max = (int)(end-start);
+                max = (int) (end - start);
             }
         }
         System.out.println("Min execution time " + min);
         System.out.println("Max execution time " + max);
-        System.out.println("Avg execution time " + sum / 10);
+        System.out.println("Avg execution time " + sum / trials);
     }
 
 }

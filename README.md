@@ -137,8 +137,10 @@ gating factor is the use of the variable in an assignment just one line down.
 
 The general rules of thumb appear to be:
 * You need to actually measure this stuff and play around with your calculation internals some.
-* Avoid declaring doubles unless you need to; prefer inlining.
+* Avoid declaring `double`s unless you need to; prefer inlining.
 * Avoid method calls unless you need to; they're about as bad as declaring doubles.
+* If you are going to operate on several `double`s, try to do the entire operation in one step.
+* Avoid including `int` values in operations which otherwise operate on `double`s.  It's worse than declaring a double.
 * Accessors aren't as bad as normal method calls, but they're still worse than not making method calls.
 * Avoid performing calculations inside array indices (e.g., `array[index + offset]`); prefer `final int arrayIndex =`
 * Avoid downcasting too early or in a loop.

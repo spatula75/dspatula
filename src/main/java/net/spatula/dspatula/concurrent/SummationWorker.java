@@ -20,6 +20,8 @@ import net.spatula.dspatula.time.sequence.Sequence;
  */
 public interface SummationWorker<T extends Sequence<T>, V extends Sequence<V>> {
 
-    void operate(int index, List<T> inputSequences, V outputSequence);
+    void forward(int index, List<T> inputSequences, V outputSequence);
+
+    void inverse(int index, List<V> inputSequences, T outputSequence);
 
 }

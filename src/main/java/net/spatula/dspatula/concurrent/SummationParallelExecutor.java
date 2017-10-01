@@ -57,14 +57,14 @@ public class SummationParallelExecutor {
         return instance;
     }
 
-    private static class WorkerSummationCallable<T extends Sequence<T>, V extends Sequence<V>> implements Callable<Void> {
+    private static class WorkerForwardSummationCallable<T extends Sequence<T>, V extends Sequence<V>> implements Callable<Void> {
 
         private final SummationWorker<T, V> discreteSystemWorker;
         private final List<T> inputSequences;
         private final V outputSequence;
         private final int point;
 
-        private WorkerSummationCallable(int point, SummationWorker<T, V> discreteSystemWorker, List<T> inputSequences,
+        private WorkerForwardSummationCallable(int point, SummationWorker<T, V> discreteSystemWorker, List<T> inputSequences,
                 V outputSequence) {
             this.inputSequences = inputSequences;
             this.outputSequence = outputSequence;
@@ -74,7 +74,30 @@ public class SummationParallelExecutor {
 
         @Override
         public Void call() throws Exception {
-            discreteSystemWorker.operate(point, inputSequences, outputSequence);
+            discreteSystemWorker.forward(point, inputSequences, outputSequence);
+            return null;
+        }
+
+    }
+
+    private static class WorkerInverseSummationCallable<T extends Sequence<T>, V extends Sequence<V>> implements Callable<Void> {
+
+        private final SummationWorker<T, V> discreteSystemWorker;
+        private final List<V> inputSequences;
+        private final T outputSequence;
+        private final int point;
+
+        private WorkerInverseSummationCallable(int point, SummationWorker<T, V> discreteSystemWorker, List<V> inputSequences,
+                T outputSequence) {
+            this.inputSequences = inputSequences;
+            this.outputSequence = outputSequence;
+            this.discreteSystemWorker = discreteSystemWorker;
+            this.point = point;
+        }
+
+        @Override
+        public Void call() throws Exception {
+            discreteSystemWorker.inverse(point, inputSequences, outputSequence);
             return null;
         }
 
@@ -86,27 +109,53 @@ public class SummationParallelExecutor {
      * As many summations will be performed in parallel as cores are available on the machine. Care must be taken to ensure that
      * workers write only to their alotted location in the output sequence.
      *
-     * (In actual practice, the internals of the sequence are never isolated/copied for the sake of performance; only the indices
-     * indicating where to start and end are updated. Because of this, in reality, each thread of the discreteSystemWorker *can* see
-     * the entire sequence if it cheats. Care must therefore be taken to ensure that DiscreteSystemWorkers are thread-safe.)
+     * (In actual practice, the internals of the sequence are never isolated/copied for the sake of performance; only the point
+     * indicating which summation to perform is updated. Because of this, in reality, each thread of the discreteSystemWorker *can*
+     * see the entire sequence if it cheats. Care must therefore be taken to ensure that DiscreteSystemWorkers are thread-safe.)
      *
      * @param summationWorker
      * @param sequences
      * @throws ProcessingException
      *             If errors occur while running the job
      */
-    public <T extends Sequence<T>, V extends Sequence<V>> void execute(final SummationWorker<T, V> summationWorker,
+    public <T extends Sequence<T>, V extends Sequence<V>> void executeForward(final SummationWorker<T, V> summationWorker,
             List<T> inputSequences, V outputSequence) throws ProcessingException {
 
         final int summationLength = outputSequence.getLength();
-
         final List<Callable<Void>> callables = new ArrayList<>(summationLength);
 
         for (int point = 0; point < summationLength; point++) {
-            callables.add(new WorkerSummationCallable<T, V>(point, summationWorker, Collections.unmodifiableList(inputSequences),
-                    outputSequence));
+            callables.add(new WorkerForwardSummationCallable<T, V>(point, summationWorker,
+                    Collections.unmodifiableList(inputSequences), outputSequence));
         }
 
+        waitForCompletion(callables);
+    }
+
+    /**
+     * Perform an inverse summation operation using as many cores as are available on the machine.
+     *
+     * @see executeForward
+     * @param summationWorker
+     * @param inputSequences
+     * @param outputSequence
+     * @throws ProcessingException
+     */
+    public <T extends Sequence<T>, V extends Sequence<V>> void executeInverse(final SummationWorker<T, V> summationWorker,
+            List<V> inputSequences, T outputSequence) throws ProcessingException {
+
+        final int summationLength = outputSequence.getLength();
+        final List<Callable<Void>> callables = new ArrayList<>(summationLength);
+
+        for (int point = 0; point < summationLength; point++) {
+            callables.add(new WorkerInverseSummationCallable<T, V>(point, summationWorker,
+                    Collections.unmodifiableList(inputSequences), outputSequence));
+        }
+
+        waitForCompletion(callables);
+    }
+
+    protected void waitForCompletion(final List<Callable<Void>> callables) throws ProcessingException {
         try {
             final List<Future<Void>> futures = executor.invokeAll(callables);
             for (final Future<Void> future : futures) {

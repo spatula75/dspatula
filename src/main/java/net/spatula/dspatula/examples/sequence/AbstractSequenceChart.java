@@ -24,6 +24,7 @@ public abstract class AbstractSequenceChart<T extends Sequence<T>> extends Appli
     protected final String plotName;
     protected final String xAxisTitle;
     protected final String yAxisTitle;
+    protected JFreeChart chart;
 
     protected abstract T getSequence() throws ProcessingException;
 
@@ -44,14 +45,14 @@ public abstract class AbstractSequenceChart<T extends Sequence<T>> extends Appli
         setVisible(true);
     }
 
-    private void initChart() throws ProcessingException {
+    protected void initChart() throws ProcessingException {
         final XYSeries series = new XYSeries("Sequence");
 
         populateSeries(series);
 
         final XYSeriesCollection collection = new XYSeriesCollection(series);
 
-        final JFreeChart chart = createPlot(collection);
+        chart = createPlot(collection);
         chart.setAntiAlias(true);
         chart.setTextAntiAlias(true);
 

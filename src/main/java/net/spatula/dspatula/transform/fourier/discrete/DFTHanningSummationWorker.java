@@ -2,7 +2,7 @@ package net.spatula.dspatula.transform.fourier.discrete;
 
 /**
  * Perform DFT for a point, applying a Hanning window to the Discrete-Time Sequence
- * 
+ *
  * @author spatula
  *
  */
